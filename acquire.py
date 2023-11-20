@@ -7,6 +7,22 @@ except:
 import pandas as pd
 import os
 
+# Generic function to check
+def check_file_exists(filename,query,url):
+    """
+    Function takes a filename, query, and url and checks if the file exists. It will load the dataset requested from either SQL or from the local file.
+    """
+    if os.path.exists(filename):
+        print('Reading from file...')
+        df = pd.read_csv(filename,index_col=0)
+    else:
+        print('Reading from database...')
+        df = pd.read_sql(query,url)
+        
+        df.to_csv(filename)
+    
+    return df
+
 # Build get_titanic_data
 def get_titanic_data():
     """
@@ -14,18 +30,12 @@ def get_titanic_data():
     
     This function requires an env file to be existent
     """
+    url = env.get_db_url('titanic_db')
+    query = 'select * from passengers'
+    filename = 'titanic.csv'
     
     # Import database
-    if os.path.exists('titanic.csv'):
-        print('Reading from file...')
-        passengers = pd.read_csv('titanic.csv',index_col=0)
-    else:
-        print('Reading from database...')
-        url = env.get_db_url('titanic_db')
-
-        passengers = pd.read_sql('select * from passengers',url)
-        
-        passengers.to_csv('titanic.csv')
+    passengers = check_file_exists(filename,query,url)
     
     return passengers
 
@@ -36,23 +46,17 @@ def get_iris_data():
     
     This function requires an env file to be existent.
     """
+    url = env.get_db_url('iris_db')
+    query = """
+        select *
+        from species
+            join measurements
+                using (species_id)
+        """
+    filename = 'iris.csv'
 
     # Import database
-    if os.path.exists('iris.csv'):
-        print('Reading from file...')
-        iris_db = pd.read_csv('iris.csv',index_col=0)
-    else:
-        print('Reading from database...')
-        url = env.get_db_url('iris_db')
-
-        iris_db = pd.read_sql("""
-            select *
-            from species
-                join measurements
-                    using (species_id)
-        """,url)
-        
-        iris_db.to_csv('iris.csv',)
+    iris_db = check_file_exists(filename,query,url)
     
     return iris_db
 
@@ -63,16 +67,8 @@ def get_telco_data():
     
     This function requires an env file to be existent.
     """
-    
-    # Import database
-    if os.path.exists('telco.csv'):
-        print('Reading from file...')
-        telco_churn = pd.read_csv('telco.csv',index_col=0)
-    else:
-        print('Reading from database...')
-        url = env.get_db_url('telco_churn')
-
-        telco_churn = pd.read_sql("""
+    url = env.get_db_url('telco_churn')
+    query = """
             select *
             from customers
             left join contract_types
@@ -81,8 +77,10 @@ def get_telco_data():
                 using(internet_service_type_id)
             left join payment_types
                 using(payment_type_id)
-        """,url)
-        
-        telco_churn.to_csv('telco.csv')
+        """
+    filename = 'telco.csv'
+    
+    # Import database
+    telco_churn = check_file_exists(filename,query,url)
     
     return telco_churn
