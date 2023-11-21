@@ -20,11 +20,28 @@ def prep_iris(iris):
     return iris
 
 # Prepare Titanic database
+def prep_titanic(titanic):
+    """
+    Cleans and prepares titanic dataset. Removes deck, class, and embarked columns. Turns columns with fewer than 10 unique values into object series. 
+    Turns passenger_id into object series. Returns dataframe containing cleaned titanic data.
+    """
+    # Drop unnecessary columns
+    titanic = titanic.drop(columns=['deck','class','embarked'])
+    
+    # turn categoricals into objects
+    for col in titanic.columns:
+            if titanic[col].dtype != 'object' and titanic[col].nunique() < 10:
+                titanic[col] = titanic[col].astype(object)
+    
+    # manually assign passenger_id to object
+    titanic.passenger_id = titanic.passenger_id.astype(object)
+    
+    return titanic
 
 # Prepare telco_churn database
 def prep_telco(telco):
     """
-    ADD ME
+    Cleans telco_churn data set. Takes in raw telco dataframe. Drops most ID columns. Goes through internet service types and replaces nulls with none. Fixes fake nulls in total_charges. Finally makes categorical variables into object types and returns end product.
     """
     # Drop extra ID columns
     telco = telco.drop(columns=['payment_type_id','internet_service_type_id','contract_type_id'],errors='ignore')
@@ -46,7 +63,11 @@ def prep_telco(telco):
 # Split given database
 def split_df(df,strat_var):
     """
-    ADD ME!
+    Returns three dataframes split from one for use in model training, validation, and testing. Takes two arguments:
+        df: any dataframe to be split
+        strat_var: the value to stratify on. This value should be a categorical variable.
+    
+    Function performs two splits, first to primarily make the training set, and the second to make the validate and test sets.
     """
     # Run first split
     train, validate_test = train_test_split(df,
