@@ -61,7 +61,7 @@ def prep_telco(telco):
     return telco
 
 # Split given database
-def split_df(df,strat_var):
+def split_df(df,strat_var,seed=123):
     """
     Returns three dataframes split from one for use in model training, validation, and testing. Takes two arguments:
         df: any dataframe to be split
@@ -72,14 +72,14 @@ def split_df(df,strat_var):
     # Run first split
     train, validate_test = train_test_split(df,
                  train_size=0.60,
-                random_state=123,
+                random_state=seed,
                  stratify=df[strat_var]
                 )
     
     # Run second split
     validate, test = train_test_split(validate_test,
                 test_size=0.50,
-                 random_state=123,
+                 random_state=seed,
                  stratify=validate_test[strat_var]
                 )
     
