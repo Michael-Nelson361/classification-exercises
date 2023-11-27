@@ -53,6 +53,9 @@ def prep_telco(telco):
     telco.total_charges = np.where(telco.total_charges==' ',telco.tenure*telco.monthly_charges,telco.total_charges)
     telco.total_charges = telco.total_charges.astype(float)
     
+    # rename tenure column to make it more understandable
+    telco = telco.rename(columns={'tenure':'tenure_mths'})
+    
     # Convert categoricals into objects
     for col in telco.columns:
         if telco[col].dtype != 'object' and telco[col].nunique() < 10:
