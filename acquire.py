@@ -84,3 +84,24 @@ def get_telco_data():
     telco_churn = check_file_exists(filename,query,url)
     
     return telco_churn
+
+def df_info(df,include=False):
+    """
+    Function takes a dataframe and returns potentially relevant information about it (including a sample)
+    
+    include=bool, default to False. To add the results from a describe method, pass True to the argument.
+    """
+    df_inf = pd.DataFrame(index=df.columns,
+            data = {
+                'nunique':df.nunique()
+                ,'dtypes':df.dtypes
+                ,'isnull':df.isnull().sum()
+                ,'sample':df.sample(1).iloc[0]
+            })
+    
+    if include == True:
+        return df_inf.merge(df.describe(include='all').T,how='left',left_index=True,right_index=True)
+    elif include == False:
+        return df_inf
+    else:
+        print('Value passed to "include" argument is invalid.')
