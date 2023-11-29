@@ -1,12 +1,8 @@
 # Import libraries
 import pandas as pd
 import numpy as np
-import acquire
-import matplotlib.pyplot as plt
-import env
 
 # Import functions
-from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
 
 # Prepare iris database
@@ -43,8 +39,6 @@ def prep_telco(telco):
     """
     Cleans telco_churn data set. Takes in raw telco dataframe. Drops most ID columns. Goes through internet service types and replaces nulls with none. Fixes fake nulls in total_charges. Finally makes categorical variables into object types and returns end product.
     """
-    # Drop extra ID columns
-    telco = telco.drop(columns=['payment_type_id','internet_service_type_id','contract_type_id'],errors='ignore')
     
     # Replace nulls in internet_service_type with None
     telco.internet_service_type = np.where(telco.internet_service_type.isnull(),'None',telco.internet_service_type)
@@ -55,6 +49,63 @@ def prep_telco(telco):
     
     # rename tenure column to make it more understandable
     telco = telco.rename(columns={'tenure':'tenure_mths'})
+    
+    # combine streaming services
+    telco['streaming']= np.select(
+        [
+        (telco['streaming_movies'] == 'Yes') & (telco['streaming_tv'] == 'Yes'),
+        (telco['streaming_movies'] == 'Yes'),
+        (telco['streaming_tv'] == 'Yes')
+        ],
+        ['Both', 'Movies', 'TV'],
+        default='None'
+    )
+    
+    # Combine online services
+    telco['online_services']= np.select(
+        [
+        (telco['online_security'] == 'Yes') & (telco['online_backup'] == 'Yes'),
+        (telco['online_security'] == 'Yes'),
+        (telco['online_backup'] == 'Yes')
+        ],
+        ['Both', 'Security', 'Backup'],
+        default='None'
+    )
+    
+    # Combine device_protection and tech_support
+    telco['support']= np.select(
+        [
+        (telco['device_protection'] == 'Yes') & (telco['tech_support'] == 'Yes'),
+        (telco['device_protection'] == 'Yes'),
+        (telco['tech_support'] == 'Yes')
+        ],
+        ['Both', 'Device Protection', 'Tech Support'],
+        default='None'
+    )
+    
+    # Combine phone service
+    telco['phone_lines'] = np.select(
+        [
+        (telco['multiple_lines'] == 'No') & (telco['phone_service'] == 'Yes'),
+        (telco['multiple_lines'] == 'Yes')
+        ],
+        ['Single', 'Multiple'],
+        default='No phone service'
+    )
+    
+    # Drop extra columns
+    telco = telco.drop(columns=['payment_type_id',
+                                'internet_service_type_id',
+                                'contract_type_id',
+                                'streaming_movies',
+                                'streaming_tv',
+                                'online_security',
+                                'online_backup',
+                                'device_protection',
+                                'tech_support',
+                                'multiple_lines',
+                                'phone_service'
+                               ])
     
     # Convert categoricals into objects
     for col in telco.columns:
