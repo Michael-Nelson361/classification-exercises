@@ -51,36 +51,39 @@ def prep_telco(telco):
     telco = telco.rename(columns={'tenure':'tenure_mths'})
     
     # combine streaming services
-    telco['streaming']= np.select(
+    telco['streaming'] = np.select(
         [
         (telco['streaming_movies'] == 'Yes') & (telco['streaming_tv'] == 'Yes'),
+        (telco['streaming_movies'] == 'No') & (telco['streaming_tv'] == 'No'),
         (telco['streaming_movies'] == 'Yes'),
         (telco['streaming_tv'] == 'Yes')
         ],
-        ['Both', 'Movies', 'TV'],
-        default='None'
+        ['Both', 'Neither', 'Movies', 'TV'],
+        default='No internet service'
     )
     
     # Combine online services
-    telco['online_services']= np.select(
+    telco['online_services'] = np.select(
         [
         (telco['online_security'] == 'Yes') & (telco['online_backup'] == 'Yes'),
+        (telco['online_security'] == 'No') & (telco['online_backup'] == 'No'),
         (telco['online_security'] == 'Yes'),
         (telco['online_backup'] == 'Yes')
         ],
-        ['Both', 'Security', 'Backup'],
-        default='None'
+        ['Both', 'Neither', 'Security', 'Backup'],
+        default='No internet service'
     )
     
     # Combine device_protection and tech_support
-    telco['support']= np.select(
+    telco['support'] = np.select(
         [
         (telco['device_protection'] == 'Yes') & (telco['tech_support'] == 'Yes'),
+        (telco['device_protection'] == 'No') & (telco['tech_support'] == 'No'),
         (telco['device_protection'] == 'Yes'),
         (telco['tech_support'] == 'Yes')
         ],
-        ['Both', 'Device Protection', 'Tech Support'],
-        default='None'
+        ['Both', 'Neither', 'Device Protection', 'Tech Support'],
+        default='No internet service'
     )
     
     # Combine phone service
