@@ -20,12 +20,6 @@ def preprocess_titanic(df):
     # Drop columns that are not encoded
     df = df.drop(columns=['sex','embark_town','passenger_id'],errors='ignore')
     
-    # Fill null values in age based on the mean age of a passenger's class
-    # Based on the following lines I used to find potential correlation with other columns:
-    # train.corr()['age']
-    # pd.crosstab(pd.cut(train.age,bins=5),train.pclass,dropna=False,normalize=True)*100
-    df.age = df.age.fillna(round(df.groupby('pclass').age.transform('mean'),2))
-    
     # Encode everything as numerics
     return df.astype(float)
 

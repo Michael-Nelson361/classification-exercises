@@ -32,6 +32,15 @@ def prep_titanic(titanic):
     # manually assign passenger_id to object
     titanic.passenger_id = titanic.passenger_id.astype(object)
     
+    # Fill null values in age based on the mean age of a passenger's class
+    # Based on the following lines I used to find potential correlation with other columns:
+    # train.corr()['age']
+    # pd.crosstab(pd.cut(train.age,bins=5),train.pclass,dropna=False,normalize=True)*100
+    titanic.age = titanic.age.fillna(round(titanic.groupby('pclass').age.transform('mean'),2))
+    
+    # fill embark_town based on mode
+    titanic['embark_town'] = titanic.embark_town.fillna(titanic.embark_town.mode()[0])
+
     return titanic
 
 # Prepare telco_churn database
