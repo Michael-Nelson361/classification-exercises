@@ -65,3 +65,50 @@ def preprocess_telco(df):
     ])
     
     return df.astype(float)
+
+def confusion_matrix(y_actual,y_pred,positive=None,get_rates=False):
+    '''
+    Return a confusion matrix and dictionary of its contents.
+    
+    Parameters:
+    ----------
+    y_actual: also known as y_true; a Series or array containing the target variable of a dataset
+    y_pred: a Series or array containing the predictions made
+    positive: default=None; the value to determine the positive values of the matrix. 
+        If no value given, the most frequently occurring value in the target variable will be assigned as the positive.
+    get_rates: bool, default=False; If True, then it will return the rates instead of the value counts themselves.
+        'rates' refers to True Positive Rate, True Negative Rate, etc.
+        
+    '''
+    # set defaults for testing
+    # y_actual = y_train
+    # y_pred = knn.predict(X_train)
+    # positive = y_actual.mode()[0]
+    
+    # get the positive if not defined
+    if positive==None:
+        positive = y_actual.mode()[0]
+
+    # get the negative
+    negative = y_actual.unique()[y_actual.unique() != positive][0]
+
+    # isolate target_name just in case
+    target_name = y_actual.name
+
+    # remap the arrays
+    y_actual = pd.Series(np.where(y_actual == positive,'P='+str(positive),'N='+str(negative)),name=target_name)
+    y_pred = pd.Series(np.where(y_pred == positive,'P='+str(positive),'N='+str(negative)),name='predicted')
+    
+    # create the matrix
+    if get_rates == True:
+        matrix = pd.crosstab(y_pred,y_actual,normalize='columns')
+    else:
+        matrix = pd.crosstab(y_pred,y_actual)
+    
+    # get values 
+    TN = matrix.iloc[0,0]
+    FP = matrix.iloc[1,0]
+    FN = matrix.iloc[0,1]
+    TP = matrix.iloc[1,1]
+    
+    return matrix,{'TN':TN,'FP':FP,'FN':FN,'TP':TP}
