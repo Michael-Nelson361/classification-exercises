@@ -85,20 +85,27 @@ def get_telco_data():
     
     return telco_churn
 
-def df_info(df,include=False):
+def df_info(df,include=False,samples=1):
     """
     Function takes a dataframe and returns potentially relevant information about it (including a sample)
-    
+
     include=bool, default to False. To add the results from a describe method, pass True to the argument.
+    samples=int, default to 1. Shows 1 sample by default, but can be modified to include more samples if desired.
     """
+    
+    # create the df_inf dataframe
     df_inf = pd.DataFrame(index=df.columns,
             data = {
                 'nunique':df.nunique()
                 ,'dtypes':df.dtypes
                 ,'isnull':df.isnull().sum()
-                ,'sample':df.sample(1).iloc[0]
             })
     
+    # append samples based on input
+    if samples >= 1:
+        df_inf = df_inf.merge(df.sample(samples).iloc[0:samples].T,how='left',left_index=True,right_index=True)
+    
+    # append describe results if option selected
     if include == True:
         return df_inf.merge(df.describe(include='all').T,how='left',left_index=True,right_index=True)
     elif include == False:
